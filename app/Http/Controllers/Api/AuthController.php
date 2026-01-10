@@ -44,6 +44,12 @@ class AuthController extends Controller
         // cari email user di tabel users
         $user = User::where('email', $request->email)->first();
         // jika email user ketemu dan password benar
-        if($)
+        if($user && Hash::check($request->password, $user->password)){
+            $token = $user->createToken('Personal Access Token')->plainTextToken;
+            $response=['user'=>$user, 'token'=>$token];
+            return response()->json($response, 200);
+        }
+        $response = ['massage'=>'Email atau Password salah'];
+        return response()->json($response, 400);
     }
 }
