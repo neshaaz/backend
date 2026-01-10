@@ -2,39 +2,48 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Models\User;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Validator;
 
 class AuthController extends Controller
 {
-    // REGISTER
     public function register(Request $request)
     {
+        // validate
+        $rules=[
+            'name'=> 'required|string',
+            'email'=> 'required|string|unique:users',
+            'password'=> 'required|string|min:6'
+        ];
+        $validator = Validator::make($request->all(), $rules);
+        if($validator->fails()){
+            return response()->json($validator->errors(), 400);
+        }
+        // Tambah User
         $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => bcrypt($request->password),
+            'name'=>$request->name,
+            'email'=>$request->email,
+            'password'=>Hash::make($request->password),
         ]);
-
-        return response()->json([
-            'message' => 'Register berhasil',
-            'user' => $user
-        ]);
+        $token = $user->createToken('Personal Access Token')->plainTextToken;
+        $response = ['user'=> $user, 'token'=>$token];
+        return response()->json($response, 200);
     }
-
-    // LOGIN
+    
     public function login(Request $request)
     {
-        if (!Auth::attempt($request->only('email', 'password'))) {
-            return response()->json(['message' => 'Login gagal'], 401);
-        }
-
-        $user = Auth::user();
-        $token = $user->createToken('token')->plainTextToken;
-
-        return response()->json([
-            'token' => $token,
-            'user' => $user
-        ]);
+        // validate input
+        $rules = [
+            'email' => 'required',
+            'password' => 'required|string'
+        ];
+        $request->validate($rules);
+        // cari email user di tabel users
+        $user = User::where('email', $request->email)->first();
+        // jika email user ketemu dan password benar
+        if($)
     }
 }
