@@ -59,4 +59,41 @@ class TransaksiController extends Controller
             'data' => $transaksi
         ], 201);
     }
+
+    // Edit Transaksi
+    public function update(Request $request, $id)
+    {
+        $request->validate([
+            'nama_transaksi' => 'required|string',
+            'jenis' => 'required|in:income,expense',
+            'kategori' => 'required|string',
+            'total' => 'required|numeric|min:1',
+            'tanggal' => 'required|date',
+        ]);
+
+        $transaksi = Transaksi::where('id', $id)
+            ->where('user_id', auth()->id())
+            ->first();
+
+        if (!$transaksi) {
+            return response()->json([
+                'status' => false,
+                'massage' => 'Transaksi tidak ditemukan'
+            ], 400);
+        }
+
+        $transaksi->update([
+            'nama_transaksi' => $request->nama_transaksi,
+            'jenis' => $request->jenis,
+            'kategori' => $request->kategori,
+            'total' => $request->total,
+            'tanggal' => $request->tanggal,
+        ]);
+
+        return response()->json([
+            'status' => true,
+            'massage' => 'Transaksi berhasil diubah',
+            'data' => $transaksi
+        ]);
+    }
 }
