@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Transaksi;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 
 class TransaksiController extends Controller
@@ -38,7 +39,7 @@ class TransaksiController extends Controller
     {
         $request->validate([
             'nama_transaksi' => 'required|string',
-            'jenis' => 'required|in:income,expense',
+            'jenis' => 'required|in:pemasukan,pengeluaran',
             'kategori' => 'required|string',
             'total' => 'required|numeric|min:1',
             'tanggal' => 'required|date',
@@ -65,7 +66,7 @@ class TransaksiController extends Controller
     {
         $request->validate([
             'nama_transaksi' => 'required|string',
-            'jenis' => 'required|in:income,expense',
+            'jenis' => 'required|in:pemasukan,pengeluaran',
             'kategori' => 'required|string',
             'total' => 'required|numeric|min:1',
             'tanggal' => 'required|date',
@@ -94,6 +95,28 @@ class TransaksiController extends Controller
             'status' => true,
             'massage' => 'Transaksi berhasil diubah',
             'data' => $transaksi
+        ]);
+    }
+
+    // Hapus Transaksi
+    public function destroy($id)
+    {
+        $transaksi = Transaksi::where('id', $id)
+            ->where('user_id', auth()->id())
+            ->first();
+
+        if (!$transaksi) {
+            return response()->json([
+                'status' => false,
+                'massage' => 'Transaksi tidak ditemukan'
+            ], 404);
+        }
+
+        $transaksi->delete();
+
+        return response()->json([
+            'status' => true,
+            'massage' => 'Transaksi berhasil dihapus'
         ]);
     }
 }
