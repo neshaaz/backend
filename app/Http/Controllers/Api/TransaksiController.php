@@ -9,31 +9,6 @@ use Illuminate\Http\Request;
 
 class TransaksiController extends Controller
 {
-    // List Transaksi
-    public function index(Request $request)
-    {
-        $query = Transaksi::where('user_id', $request->user()->id);
-
-        // Jenis transaksi (pemasukan / pengeluaran)
-        if ($request->jenis) {
-            $query->where('type', $request->jenis);
-        }
-
-        // Jenis kategori
-        if ($request->kategori) {
-            $query->where('kategori', $request->kategori);
-        }
-
-        $transaksi = $query
-            ->orderBy('tanggal', 'desc')
-            ->get();
-
-        return response()->json([
-            'status' => true,
-            'data' => $transaksi
-        ]);
-    }
-
     // Tambah Transaksi
     public function store(Request $request)
     {
@@ -117,6 +92,60 @@ class TransaksiController extends Controller
         return response()->json([
             'status' => true,
             'massage' => 'Transaksi berhasil dihapus'
+        ]);
+    }
+
+    // List Transaksi
+    public function index(Request $request)
+    {
+        $query = Transaksi::where('user_id', $request->user()->id);
+
+        // Jenis transaksi (pemasukan / pengeluaran)
+        if ($request->jenis) {
+            $query->where('type', $request->jenis);
+        }
+
+        // Jenis kategori
+        if ($request->kategori) {
+            $query->where('kategori', $request->kategori);
+        }
+
+        $transaksi = $query
+            ->orderBy('tanggal', 'desc')
+            ->get();
+
+        return response()->json([
+            'status' => true,
+            'data' => $transaksi
+        ]);
+    }
+
+    // Transaksi tampil di Dashboard
+    public function dashboard(Request $request)
+    {
+        $userId = $request->user()->id;
+
+        $totalPemasukan = Transaksi::where('user_id', $userId)
+            ->where('jenis', 'pemasukan')
+            ->sum('total');
+
+        $totalPengeluaran = Transaksi::where('user_id', $userId)
+            ->where('jenis', 'pengeluaran')
+            ->sum('total');
+
+        $transaksiTerbaru = Transaksi::where('user_id', $userId)
+            ->orderBy('tanggal', 'desc')
+            ->limit(5)
+            ->get();
+
+        return response()->json([
+            'status' => true,
+            'data' => [
+                'total_pemasukan' => $totalPemasukan,
+                'total_pengeluaran' => $totalPengeluaran,
+                'saldo' => $totalPemasukan - $totalPengeluaran,
+                'transaksi_terbaru' => $transaksiTerbaru
+            ]
         ]);
     }
 }
