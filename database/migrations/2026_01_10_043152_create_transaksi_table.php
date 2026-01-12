@@ -14,10 +14,10 @@ return new class extends Migration
         Schema::create('transaksi', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->string('nama');
+            $table->string('nama_transaksi');
             $table->enum('jenis', ['pemasukan', 'pengeluaran']);
             $table->string('kategori');
-            $table->integer('total');
+            $table->decimal('total', 15, 2);
             $table->date('tanggal');
             $table->timestamps();
         });

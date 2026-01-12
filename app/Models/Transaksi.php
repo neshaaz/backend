@@ -2,18 +2,23 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Transaksi extends Model
 {
-    protected $table = 'transaksi';
+    use HasFactory;
 
     protected $fillable = [
         'user_id',
-        'nama',
+        'nama_transaksi',
         'jenis',
         'kategori',
         'total',
         'tanggal',
+    ];
+
+    protected $casts = [
+        'tanggal' => 'date'
     ];
 }
