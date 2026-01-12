@@ -27,9 +27,36 @@ class TransaksiController extends Controller
             ->orderBy('tanggal', 'desc')
             ->get();
 
-            return response()->json([
-                'status' => true,
-                'data' => $transaksi
-            ]);
+        return response()->json([
+            'status' => true,
+            'data' => $transaksi
+        ]);
+    }
+
+    // Tambah Transaksi
+    public function store(Request $request)
+    {
+        $request->validate([
+            'nama_transaksi' => 'required|string',
+            'jenis' => 'required|in:income,expense',
+            'kategori' => 'required|string',
+            'total' => 'required|numeric|min:1',
+            'tanggal' => 'required|date',
+        ]);
+
+        $transaksi = Transaksi::create([
+            'user_id' => $request->user()->id,
+            'nama_transaksi' => $request->nama_transaksi,
+            'jenis' => $request->jenis,
+            'kategori' => $request->kategori,
+            'total' => $request->total,
+            'tanggal' => $request->tanggal,
+        ]);
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Transaksi berhasil ditambahkan',
+            'data' => $transaksi
+        ], 201);
     }
 }
