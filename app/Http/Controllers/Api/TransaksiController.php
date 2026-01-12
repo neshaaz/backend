@@ -54,8 +54,8 @@ class TransaksiController extends Controller
         if (!$transaksi) {
             return response()->json([
                 'status' => false,
-                'massage' => 'Transaksi tidak ditemukan'
-            ], 400);
+                'message' => 'Transaksi tidak ditemukan'
+            ], 404);
         }
 
         $transaksi->update([
@@ -68,7 +68,7 @@ class TransaksiController extends Controller
 
         return response()->json([
             'status' => true,
-            'massage' => 'Transaksi berhasil diubah',
+            'message' => 'Transaksi berhasil diubah',
             'data' => $transaksi
         ]);
     }
@@ -83,7 +83,7 @@ class TransaksiController extends Controller
         if (!$transaksi) {
             return response()->json([
                 'status' => false,
-                'massage' => 'Transaksi tidak ditemukan'
+                'message' => 'Transaksi tidak ditemukan'
             ], 404);
         }
 
@@ -91,7 +91,7 @@ class TransaksiController extends Controller
 
         return response()->json([
             'status' => true,
-            'massage' => 'Transaksi berhasil dihapus'
+            'message' => 'Transaksi berhasil dihapus'
         ]);
     }
 
@@ -102,7 +102,7 @@ class TransaksiController extends Controller
 
         // Jenis transaksi (pemasukan / pengeluaran)
         if ($request->jenis) {
-            $query->where('type', $request->jenis);
+            $query->where('jenis', $request->jenis);
         }
 
         // Jenis kategori
@@ -145,6 +145,51 @@ class TransaksiController extends Controller
                 'total_pengeluaran' => $totalPengeluaran,
                 'saldo' => $totalPemasukan - $totalPengeluaran,
                 'transaksi_terbaru' => $transaksiTerbaru
+            ]
+        ]);
+    }
+
+    // Transaksi Rekap Keuangan
+    public function rekap(Request $request)
+    {
+        $userId = auth()->id();
+
+        $bulan = $request->bulan ?? now()->month;
+        $tahun = $request->tahun ?? now()->year;
+
+        // Total Pemasukan
+        $totalPemasukan = Transaksi::where('user_id', $userId)
+            ->where('jenis', 'pemasukan')
+            ->whereMonth('tanggal', $bulan)
+            ->whereYear('tanggal', $tahun)
+            ->sum('total');
+
+        // Total Pengeluaran
+        $totalPengeluaran = Transaksi::where('user_id', $userId)
+            ->where('jenis', 'pengeluaran')
+            ->whereMonth('tanggal', $bulan)
+            ->whereYear('tanggal', $tahun)
+            ->sum('total');
+
+        // Per kategori pengeluaran
+        $rekapKategori = Transaksi::select(
+            'kategori',
+            DB::raw('SUM(total) as total')
+        )
+        ->where('user_id', $userId)
+        ->where('jenis', 'pengeluaran')
+        ->whereMonth('tanggal', $bulan)
+        ->whereYear('tanggal', $tahun)
+        ->groupBy('kategori')
+        ->orderByDesc('total')
+        ->get();
+
+        return response()->json([
+            'status' => true,
+            'data' => [
+                'total_pemasukan' => $totalPemasukan,
+                'total_pengeluaran' => $totalPengeluaran,
+                'rekap_kategori' => $rekapKategori
             ]
         ]);
     }
