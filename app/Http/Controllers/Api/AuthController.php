@@ -30,7 +30,13 @@ class AuthController extends Controller
         ]);
         $token = $user->createToken('Personal Access Token')->plainTextToken;
         $response = ['user'=> $user, 'token'=>$token];
-        return response()->json($response, 200);
+        // return response()->json($response, 200);
+        return response()->json([
+            'status' => true,
+            'message' => 'Register berhasil',
+            'user' => $user,
+            'token' => $token,
+        ]);
     }
     
     public function login(Request $request)
@@ -43,6 +49,7 @@ class AuthController extends Controller
         $request->validate($rules);
         // cari email user di tabel users
         $user = User::where('email', $request->email)->first();
+
         // jika email user ketemu dan password benar
         if($user && Hash::check($request->password, $user->password)){
             $token = $user->createToken('Personal Access Token')->plainTextToken;
