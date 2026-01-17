@@ -121,76 +121,76 @@ class TransaksiController extends Controller
     }
 
     // Transaksi tampil di Dashboard
-    public function dashboard(Request $request)
-    {
-        $userId = $request->user()->id;
+    // public function dashboard(Request $request)
+    // {
+    //     $userId = $request->user()->id;
 
-        $totalPemasukan = Transaksi::where('user_id', $userId)
-            ->where('jenis', 'pemasukan')
-            ->sum('total');
+    //     $totalPemasukan = Transaksi::where('user_id', $userId)
+    //         ->where('jenis', 'pemasukan')
+    //         ->sum('total');
 
-        $totalPengeluaran = Transaksi::where('user_id', $userId)
-            ->where('jenis', 'pengeluaran')
-            ->sum('total');
+    //     $totalPengeluaran = Transaksi::where('user_id', $userId)
+    //         ->where('jenis', 'pengeluaran')
+    //         ->sum('total');
 
-        $transaksiTerbaru = Transaksi::where('user_id', $userId)
-            ->orderBy('tanggal', 'desc')
-            ->limit(5)
-            ->get();
+    //     $transaksiTerbaru = Transaksi::where('user_id', $userId)
+    //         ->orderBy('tanggal', 'desc')
+    //         ->limit(5)
+    //         ->get();
 
-        return response()->json([
-            'status' => true,
-            'data' => [
-                'total_pemasukan' => $totalPemasukan,
-                'total_pengeluaran' => $totalPengeluaran,
-                'saldo' => $totalPemasukan - $totalPengeluaran,
-                'transaksi_terbaru' => $transaksiTerbaru
-            ]
-        ]);
-    }
+    //     return response()->json([
+    //         'status' => true,
+    //         'data' => [
+    //             'total_pemasukan' => $totalPemasukan,
+    //             'total_pengeluaran' => $totalPengeluaran,
+    //             'saldo' => $totalPemasukan - $totalPengeluaran,
+    //             'transaksi_terbaru' => $transaksiTerbaru
+    //         ]
+    //     ]);
+    // }
 
-    // Transaksi Rekap Keuangan
-    public function rekap(Request $request)
-    {
-        $userId = auth()->id();
+    // // Transaksi Rekap Keuangan
+    // public function rekap(Request $request)
+    // {
+    //     $userId = auth()->id();
 
-        $bulan = $request->bulan ?? now()->month;
-        $tahun = $request->tahun ?? now()->year;
+    //     $bulan = $request->bulan ?? now()->month;
+    //     $tahun = $request->tahun ?? now()->year;
 
-        // Total Pemasukan
-        $totalPemasukan = Transaksi::where('user_id', $userId)
-            ->where('jenis', 'pemasukan')
-            ->whereMonth('tanggal', $bulan)
-            ->whereYear('tanggal', $tahun)
-            ->sum('total');
+    //     // Total Pemasukan
+    //     $totalPemasukan = Transaksi::where('user_id', $userId)
+    //         ->where('jenis', 'pemasukan')
+    //         ->whereMonth('tanggal', $bulan)
+    //         ->whereYear('tanggal', $tahun)
+    //         ->sum('total');
 
-        // Total Pengeluaran
-        $totalPengeluaran = Transaksi::where('user_id', $userId)
-            ->where('jenis', 'pengeluaran')
-            ->whereMonth('tanggal', $bulan)
-            ->whereYear('tanggal', $tahun)
-            ->sum('total');
+    //     // Total Pengeluaran
+    //     $totalPengeluaran = Transaksi::where('user_id', $userId)
+    //         ->where('jenis', 'pengeluaran')
+    //         ->whereMonth('tanggal', $bulan)
+    //         ->whereYear('tanggal', $tahun)
+    //         ->sum('total');
 
-        // Per kategori pengeluaran
-        $rekapKategori = Transaksi::select(
-            'kategori',
-            DB::raw('SUM(total) as total')
-        )
-        ->where('user_id', $userId)
-        ->where('jenis', 'pengeluaran')
-        ->whereMonth('tanggal', $bulan)
-        ->whereYear('tanggal', $tahun)
-        ->groupBy('kategori')
-        ->orderByDesc('total')
-        ->get();
+    //     // Per kategori pengeluaran
+    //     $rekapKategori = Transaksi::select(
+    //         'kategori',
+    //         DB::raw('SUM(total) as total')
+    //     )
+    //     ->where('user_id', $userId)
+    //     ->where('jenis', 'pengeluaran')
+    //     ->whereMonth('tanggal', $bulan)
+    //     ->whereYear('tanggal', $tahun)
+    //     ->groupBy('kategori')
+    //     ->orderByDesc('total')
+    //     ->get();
 
-        return response()->json([
-            'status' => true,
-            'data' => [
-                'total_pemasukan' => $totalPemasukan,
-                'total_pengeluaran' => $totalPengeluaran,
-                'rekap_kategori' => $rekapKategori
-            ]
-        ]);
-    }
+    //     return response()->json([
+    //         'status' => true,
+    //         'data' => [
+    //             'total_pemasukan' => $totalPemasukan,
+    //             'total_pengeluaran' => $totalPengeluaran,
+    //             'rekap_kategori' => $rekapKategori
+    //         ]
+    //     ]);
+    // }
 }
